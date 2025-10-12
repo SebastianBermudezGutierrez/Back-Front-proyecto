@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int              @id @default(autoincrement())
+  fullName    String
+  idNumber    String           @unique
+  email       String           @unique
+  password    String
+  createdAt   DateTime         @default(now())
+  sessions    WorkoutSession[]
+  reminders   Reminder[]
+}
+
+model MuscleGroup {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  exercises  Exercise[]
+}
+
+model Exercise {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String?
+  muscleGroupId Int
+  muscleGroup   MuscleGroup     @relation(fields: [muscleGroupId], references: [id])
+  sets          WorkoutSet[]
+}
+
+model WorkoutSession {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
+  sessionDate DateTime
+  notes       String?
+  sets        WorkoutSet[]
+  createdAt   DateTime      @default(now())
+}
+
+model WorkoutSet {
+  id           Int            @id @default(autoincrement())
+  sessionId    Int
+  session      WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId   Int
+  exercise     Exercise       @relation(fields: [exerciseId], references: [id])
+  reps         Int
+  series       Int
+  weightKg     Float?
+  createdAt    DateTime       @default(now())
+}
+
+model Reminder {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  daysMask  Int       @default(0) // Lunes=1, Martes=2, etc.
+  hour      Int
+  minute    Int
+  enabled   Boolean   @default(true)
+  createdAt DateTime  @default(now())
+}
+
+model ProgressPhoto {
+  id       Int      @id @default(autoincrement())
+  takenAt  DateTime @default(now())
+  fileUri  String
+  note     String?
+}
