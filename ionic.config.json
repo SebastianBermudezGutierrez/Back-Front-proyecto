@@ -1,0 +1,7 @@
+{
+  "name": "lion-fit-pro",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
